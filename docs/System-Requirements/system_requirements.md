@@ -22,13 +22,13 @@ This system demonstrates how a QNX-based gateway can coordinate and bridge Over-
 ## 2. System Architecture
 
 ```
-+---------------------+      +---------------------+      +----------------------+
-| Host PC (Linux)     |      | QNX Virtual Machine |      | Raspberry Pi (Linux) |
-|---------------------|      |---------------------|      |----------------------|
-| - Holds update img  | FTP  | - Receives image    | SOME/IP (TCP/UDP) | - Receives data  |
-| - Initiates update  | ---> | - Performs CRC check| -----------------> | - Writes to flash|
-| - Sends commands    |      | - Forwards via TP   | <----------------- | - Sends feedback |
-+---------------------+      +---------------------+      +----------------------+
++---------------------+      +---------------------+                    +----------------------+
+| Host PC (Linux)     |      | QNX Virtual Machine |                    | Raspberry Pi (Linux) |
+|---------------------|      |---------------------|                    |----------------------|
+| - Holds update img  | FTP  | - Receives image    | SOME/IP (TCP/UDP)  | - Receives data      |
+| - Initiates update  | ---> | - Performs CRC check| -----------------> | - Writes to flash    |
+| - Sends commands    |      | - Forwards via TP   | <----------------- | - Sends feedback     |
++---------------------+      +---------------------+                    +----------------------+
 ```
 
 **Communication flow**

@@ -1,84 +1,156 @@
-# Introduction to Service Discovery.
-
-## SOME/IP Service Discovery – Services and Eventgroups
-### 1. Concept
-- A **Service** is a logical functionality provided by an ECU.
-- Each Service can contain **0–many Eventgroups** (collections of notifications).
-- When implemented:
-  - **ServerService** = ECU offering the Service.
-  - **ClientService** = ECU using the Service.
-  - **EventHandler** (on server) ↔ **ConsumedEventgroup** (on client).
+# 📘 Introduction to Service Discovery (SOME/IP SD)
 
 ---
 
-### 2. ECU Roles
+## 1. Concept Overview
 
-#### 🖥 Server Service
-- Offers the service when available (`OfferService`).
-- Withdraws it when unavailable (`StopOfferService`).
-- Responds to `FindService` requests from clients.
+**Service Discovery (SD)** in SOME/IP is the mechanism that allows ECUs (Electronic Control Units) to find, offer, and manage communication with each other dynamically.
 
-#### 📡 Client Service
-- Listens for `OfferService` / `StopOfferService` messages.
-- Stores discovery info in volatile memory.
-- Sends `FindService` to locate available servers.
+* A **Service** is a logical functionality (e.g., OTA update, diagnostics) provided by an ECU.
+* Each Service may contain **Eventgroups**, which are sets of notifications or data signals broadcast by the Service.
 
----
+### ECU Roles
 
-### 3. Publish/Subscribe Communication
-- Used for event-based data transfer.
-- **Server (Publisher)** → provides data/events.
-- **Client (Subscriber)** → subscribes via `SubscribeEventgroup`.
-- Publish = `OfferService`; Subscribe = `SubscribeEventgroup`.
-
-Example:  
-QNX (Server) → offers `OTA_Update_Service`.  
-Raspberry Pi (Client) → subscribes to `UpdateProgress` events.
+| Role                   | Description                                                           |
+| ---------------------- | --------------------------------------------------------------------- |
+| **ServerService**      | ECU that *offers* the service to others.                              |
+| **ClientService**      | ECU that *uses* or *consumes* the offered service.                    |
+| **EventHandler**       | Server-side logic that generates events or notifications.             |
+| **ConsumedEventgroup** | Client-side component that subscribes to receive those notifications. |
 
 ---
 
-### 4. Multicast Optimization
-- Reduces traffic when many clients subscribe to the same eventgroup.
-- **Eventhandler Multicast Endpoint (Server side)**:  
-  Server switches to multicast when many clients subscribe.
-- **Consumed Eventgroup Multicast Endpoint (Client side)**:  
-  Client requests multicast IP/port for receiving events.
----
+## 2. ECU Roles Explained
 
-# SOME/IP Service Discovery in Practice
+### 🖥 Server Service (Provider)
 
-### 1. Behavior
-- Acts like a **background daemon**.
-- Periodically sends **OfferService** or **FindService** messages.
-- Uses **TTL** to track which services are alive.
-- Clears entries when ECUs reboot or stop offering.
+* Announces availability by sending `OfferService`.
+* Withdraws availability using `StopOfferService`.
+* Replies to client `FindService` requests.
+* Example: **QNX** offering the **OTA Update Service**.
 
-### 2. OTA Setup Roles
-| ECU | Role | Function |
-|------|------|-----------|
-| QNX | Server | Offers OTA service (OfferService). |
-| Raspberry Pi | Client | Discovers OTA service (FindService). |
+### 📡 Client Service (Consumer)
 
-### 3. Implementation
-- **Do NOT re-implement SD** manually.
-- Use an existing SOME/IP library (e.g. **vsomeip**, **CommonAPI**).
-- These libraries provide:
-  - Built-in SD daemon (`vsomeipd`).
-  - Configurable IDs and endpoints.
-  - Automatic TTL and state handling.
-
-### 4. Developer Task
-- Only configure your service (ID, instance, port).
-- Start the SD daemon and your app.
-- React to callbacks when services appear/disappear.
-
-### 5. Custom Implementation
-- Only needed if building a full custom SOME/IP stack from scratch.
+* Continuously listens for `OfferService` and `StopOfferService` messages.
+* Keeps discovered services in volatile memory (cleared on restart).
+* Sends `FindService` to locate available servers.
+* Example: **Raspberry Pi** searching for the **OTA Update Service**.
 
 ---
 
-**In short:**  
-For your QNX ↔ RPi OTA system —  
-> You just need to **configure** and **run** the SD component from the SOME/IP library,  
-> not write the message format or protocol logic yourself.
+## 3. Publish/Subscribe Mechanism
 
+**Purpose:** Efficient event-driven data exchange between ECUs.
+
+| Role                    | Function              | Description                                        |
+| ----------------------- | --------------------- | -------------------------------------------------- |
+| **Server (Publisher)**  | `OfferService`        | Sends out event notifications or periodic updates. |
+| **Client (Subscriber)** | `SubscribeEventgroup` | Requests to receive updates or data streams.       |
+
+🔹 **Example Use Case (OTA System):**
+
+* QNX (Server) → Offers `OTA_Update_Service`.
+* Raspberry Pi (Client) → Subscribes to `UpdateProgress` events to monitor update status.
+
+This mechanism ensures that clients only receive relevant notifications they have subscribed to.
+
+---
+
+## 4. Multicast Optimization
+
+When multiple clients subscribe to the same eventgroup, **multicast communication** is used to reduce network traffic.
+
+| Component                                                | Function                                                                          |
+| -------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| **Eventhandler Multicast Endpoint (Server side)**        | Sends one multicast message for all subscribers instead of multiple unicast ones. |
+| **Consumed Eventgroup Multicast Endpoint (Client side)** | Configures a multicast IP/port to receive shared event notifications.             |
+
+🧩 **Example:**
+Instead of sending 10 separate messages to 10 clients, the server multicasts one message that all clients receive simultaneously.
+
+---
+
+## 5. SOME/IP SD in Practice
+
+### Behavior
+
+* Operates as a **background daemon** managing service advertisement and discovery.
+* Periodically sends:
+
+  * `OfferService` (server side)
+  * `FindService` (client side)
+* Uses **TTL (Time To Live)** to determine service validity.
+* Automatically removes inactive or rebooted ECUs.
+
+---
+
+### OTA Setup Roles
+
+| ECU              | Role   | Function                                               |
+| ---------------- | ------ | ------------------------------------------------------ |
+| **QNX**          | Server | Offers the OTA service (`OfferService`).               |
+| **Raspberry Pi** | Client | Finds and connects to the OTA service (`FindService`). |
+
+---
+
+### Implementation Guidelines
+
+🔧 **Use Existing Libraries – Don’t Reinvent SD**
+
+* Recommended libraries: **vsomeip**, **CommonAPI**.
+* They provide:
+
+  * Built-in **SD Daemon** (`vsomeipd`).
+  * Configurable **Service IDs**, **Instance IDs**, and **Endpoints**.
+  * Automatic management of **TTL** and **state changes**.
+
+---
+
+### Developer Responsibilities
+
+1. **Configure your service parameters:**
+
+   * Service ID
+   * Instance ID
+   * Port / Protocol (UDP or TCP)
+
+2. **Start the SD daemon (`vsomeipd`).**
+
+3. **Launch your application.**
+
+   * React to callback events like:
+
+     * “Service Available”
+     * “Service Lost”
+
+4. **Handle communication logic.**
+
+   * Subscribe, send, and process event data as needed.
+
+---
+
+### Custom Implementation (Optional)
+
+Only necessary if developing your **own SOME/IP stack** from scratch (e.g., for research or specialized systems).
+In standard automotive applications, using ready-made SD modules is strongly preferred.
+
+---
+
+## 🧭 Summary
+
+| Concept               | Key Point                                               |
+| --------------------- | ------------------------------------------------------- |
+| **Purpose**           | Enables ECUs to automatically find and offer services.  |
+| **Mechanism**         | Uses Offer/Find messages and Publish/Subscribe pattern. |
+| **Optimization**      | Multicast reduces redundant transmissions.              |
+| **Developer Role**    | Configure, not reimplement, the SD logic.               |
+| **Practical Example** | QNX ↔ RPi OTA Service using vsomeipd daemon.            |
+
+---
+
+### ✅ In Short
+
+For your **QNX ↔ Raspberry Pi OTA system**:
+
+> Simply **configure and launch** the Service Discovery daemon from the SOME/IP library —
+> no need to manually handle message encoding or protocol logic.
