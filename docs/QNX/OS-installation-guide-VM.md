@@ -89,6 +89,7 @@ Use Visual Studio Code for QNX development with modern editor capabilities.
 1. Open **VS Code**.
 2. Go to the **Extensions** tab and install **“QNX Extension”**.
 3. Configure it to detect your installed **SDP** and **Momentics IDE**.
+   - You can configure the SDP path which we have already installed in `/home/<user>/qnx800
 
 You can watch this reference tutorial for the setup:
 ▶️ [QNX Development Tools Setup Video](https://www.youtube.com/watch?v=s8_rvkSfj10)
