@@ -1,0 +1,3 @@
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/vsomeip_server_remote/CMakeFiles/service-example.dir
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/vsomeip_server_remote/CMakeFiles/edit_cache.dir
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/vsomeip_server_remote/CMakeFiles/rebuild_cache.dir
