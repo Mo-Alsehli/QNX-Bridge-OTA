@@ -7,7 +7,7 @@ find_package(Boost 1.55 COMPONENTS system thread log REQUIRED)
 
 include_directories(
     ${Boost_INCLUDE_DIR}
-    ${VSOMEIP_INCLUDE_DIRES}
+    ${VSOMEIP_INCLUDE_DIRS}
 )
 
 add_executable(service-example server/src/service-example.cpp)
