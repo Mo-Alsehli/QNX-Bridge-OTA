@@ -1,0 +1,3 @@
+/home/mmagdi/qnxprojects/vsomeip-server-qnx/build/CMakeFiles/service-example.dir
+/home/mmagdi/qnxprojects/vsomeip-server-qnx/build/CMakeFiles/edit_cache.dir
+/home/mmagdi/qnxprojects/vsomeip-server-qnx/build/CMakeFiles/rebuild_cache.dir
