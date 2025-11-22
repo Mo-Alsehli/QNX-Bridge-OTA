@@ -130,8 +130,11 @@ Run a **virtual QNX target** on your PC using **VMware Workstation**, allowing y
    * **Architecture:** `x86_64`
 4. When prompted for `mkqnximage`, either:
 
-   * Provide the path if available, or
+   * Provide the options if available, or
+   * **NOTE**: you might need to specify the option `--data-size='size in MBs'` to increase the 
+      data size partition as it's by default couple of MBs and will be very small.
    * Simply press **Enter** to continue with defaults.
+
 
 > **Result:**
 > VMware Workstation will automatically launch, and your **QNX virtual machine** will boot up.

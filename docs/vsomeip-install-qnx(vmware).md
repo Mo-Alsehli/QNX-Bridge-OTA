@@ -127,12 +127,10 @@ make -C build-files/ports/boost install -j4 CPU=x86_64
 
 ```bash
 ls $QNX_TARGET/x86_64/usr/local/lib | grep boost
-ls $QNX_TARGET/x86_64/usr/local/include/boost
 ```
 
 You should see:
 - `libboost_system.so`, `libboost_thread.so`, `libboost_log.so`, etc.
-- Boost header files in the include directory
 
 ---
 
