@@ -1,0 +1,4 @@
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/HelloCommonAPI-ubuntu/build/CMakeFiles/HelloWorldService.dir
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/HelloCommonAPI-ubuntu/build/CMakeFiles/HelloWorldClient.dir
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/HelloCommonAPI-ubuntu/build/CMakeFiles/edit_cache.dir
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/HelloCommonAPI-ubuntu/build/CMakeFiles/rebuild_cache.dir
