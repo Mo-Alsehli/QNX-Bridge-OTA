@@ -1,0 +1,26 @@
+{
+    "unicast": "192.168.10.3",
+
+    "applications": [
+        {
+            "name": "service-sample",
+            "id": "0x1212"
+        }
+    ],
+
+    "services": [
+        {
+            "service": "0x1234",
+            "instance": "0x5678",
+            "reliable": "30509"
+        }
+    ],
+    "routing": "service-sample",
+
+    "service-discovery": {
+        "enable": "true",
+        "multicast": "224.224.224.245",
+        "port": "30490",
+        "protocol": "udp"
+    }
+}

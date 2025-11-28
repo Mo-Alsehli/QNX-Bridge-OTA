@@ -1,0 +1,529 @@
+diff -ruN capicxx-someip-runtime.orig/src/CommonAPI/SomeIP/ClientId.cpp capicxx-someip-runtime/src/CommonAPI/SomeIP/ClientId.cpp
+--- capicxx-someip-runtime.orig/src/CommonAPI/SomeIP/ClientId.cpp	2025-11-25 12:43:46.184143689 +0200
++++ capicxx-someip-runtime/src/CommonAPI/SomeIP/ClientId.cpp	2025-11-25 17:56:32.177597556 +0200
+@@ -72,11 +72,11 @@
+     return client_id_;
+ }
+ 
+-uid_t ClientId::getUid() const {
++CommonAPI::uid_t ClientId::getUid() const {
+     return uid_;
+ }
+ 
+-gid_t ClientId::getGid() const {
++CommonAPI::gid_t ClientId::getGid() const {
+     return gid_;
+ }
+ 
+diff -ruN capicxx-someip-runtime.orig/src/CommonAPI/SomeIP/Configuration.cpp capicxx-someip-runtime/src/CommonAPI/SomeIP/Configuration.cpp
+--- capicxx-someip-runtime.orig/src/CommonAPI/SomeIP/Configuration.cpp	2025-11-25 12:43:46.184256719 +0200
++++ capicxx-someip-runtime/src/CommonAPI/SomeIP/Configuration.cpp	2025-11-25 22:57:56.289978705 +0200
+@@ -3,13 +3,25 @@
+ // License, v. 2.0. If a copy of the MPL was not distributed with this
+ // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-#ifdef _WIN32
+-#include <Windows.h>
+-#else
+-#include <unistd.h>
+-#endif
++// #ifdef _WIN32
++// #include <Windows.h>
++// #else
++// #include <unistd.h>
++// #endif
++
++// #include <sys/stat.h>
+ 
++extern "C" {
+ #include <sys/stat.h>
++#include <unistd.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <limits.h>
++}
++
++extern "C" int stat(const char *path, struct stat *buf);
++extern "C" char *getcwd(char *buf, size_t size);
++
+ 
+ #include <CommonAPI/IniFileReader.hpp>
+ #include <CommonAPI/Logger.hpp>
+@@ -19,6 +31,11 @@
+ #include <CommonAPI/SomeIP/Constants.hpp>
+ #include <CommonAPI/SomeIP/Defines.hpp>
+ 
++// QNX FIX: ensure we call the C stat(), not the struct constructor
++
++// QNX FIX: force C linkage functions into scope
++//using ::stat;
++
+ const char *COMMONAPI_SOMEIP_DEFAULT_CONFIG_FILE = "commonapi-someip.ini";
+ const char *COMMONAPI_SOMEIP_DEFAULT_CONFIG_FOLDER = "/etc/";
+ 
+@@ -40,7 +57,7 @@
+ 	if (config) {
+ 		defaultConfig_ = config;
+ 		struct stat s;
+-		if (stat(defaultConfig_.c_str(), &s) != 0) {
++		if ((stat(defaultConfig_.c_str(), &s)) != 0) {
+ 			COMMONAPI_ERROR("Failed to load ini file passed via "
+ 					"COMMONAPI_SOMEIP_CONFIG environment: ", defaultConfig_);
+ 		}
+@@ -112,7 +129,7 @@
+ #ifdef _WIN32
+     if (GetCurrentDirectory(MAX_PATH_LEN, currentDirectory)) {
+ #else
+-    if (getcwd(currentDirectory, MAX_PATH_LEN)) {
++    if (getcwd(currentDirectory, (size_t)MAX_PATH_LEN)) {
+ #endif
+         config = currentDirectory;
+         config += "/";
+diff -ruN capicxx-someip-runtime.orig/src/CommonAPI/SomeIP/StringEncoder.cpp capicxx-someip-runtime/src/CommonAPI/SomeIP/StringEncoder.cpp
+--- capicxx-someip-runtime.orig/src/CommonAPI/SomeIP/StringEncoder.cpp	2025-11-25 12:43:46.185725880 +0200
++++ capicxx-someip-runtime/src/CommonAPI/SomeIP/StringEncoder.cpp	2025-11-25 14:27:34.021240774 +0200
+@@ -4,6 +4,10 @@
+ // file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+ #include <CommonAPI/SomeIP/StringEncoder.hpp>
++#if defined(__QNX__)
++    #include <sys/param.h>
++    #include <inttypes.h>
++#endif
+ 
+ namespace CommonAPI {
+ namespace SomeIP {
+diff -ruN capicxx-someip-runtime.orig/src/CommonAPI/SomeIP/Watch.cpp capicxx-someip-runtime/src/CommonAPI/SomeIP/Watch.cpp
+--- capicxx-someip-runtime.orig/src/CommonAPI/SomeIP/Watch.cpp	2025-11-25 12:43:46.186081507 +0200
++++ capicxx-someip-runtime/src/CommonAPI/SomeIP/Watch.cpp	2025-11-27 19:53:22.987747704 +0200
+@@ -1,168 +1,69 @@
+-// Copyright (C) 2015-2020 Bayerische Motoren Werke Aktiengesellschaft (BMW AG)
+-// This Source Code Form is subject to the terms of the Mozilla Public
+-// License, v. 2.0. If a copy of the MPL was not distributed with this
+-// file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-
+ #include <CommonAPI/SomeIP/Configuration.hpp>
+ #include <CommonAPI/SomeIP/Watch.hpp>
+ 
+ #include <fcntl.h>
+-
+ #include <cstdio>
+ #include <sstream>
+ 
+-#ifdef _WIN32
+-#include <WinSock2.h>
+-#include <ws2tcpip.h>
++#if defined(__QNX__)
++extern "C" {
++#include <unistd.h>
++#include <sys/types.h>
++#include <sys/socket.h>
++#include <sys/uio.h>
++#include <errno.h>
++}
+ #else
+ #include <unistd.h>
+ #include <sys/eventfd.h>
+ #endif
+ 
+-#if ANDROID
+-#if !defined(EFD_SEMAPHORE)
+-#define EFD_SEMAPHORE (1 << 0)
+-#endif
+-#endif
++
++extern "C" {
++    int pipe(int fds[2]);   // exact C symbol: "pipe"
++}
++
++extern "C" {
++    ssize_t write( int fildes,
++               const void* buf,
++               size_t nbyte );
++
++}
++
++extern "C" {
++    ssize_t read( int fildes,
++              void* buf,
++              size_t nbyte );
++}
++
++extern "C" {
++    int close( int filedes );
++}
+ 
+ #include <CommonAPI/SomeIP/Connection.hpp>
+ 
+ namespace CommonAPI {
+ namespace SomeIP {
+ 
+-Watch::Watch(const std::shared_ptr<Connection> &_connection) :
+-#ifdef _WIN32
+-        pipeValue_(4),
++Watch::Watch(const std::shared_ptr<Connection> &_connection)
++#if defined(__QNX__)
++    : readFd_(-1)
++    , writeFd_(-1)
+ #else
+-        eventFd_(0),
+-        eventFdValue_(1),
++    : eventFd_(0)
++    , eventFdValue_(1)
+ #endif
+-        lastProcessing_()
++    , lastProcessing_()
+ {
+-#ifdef _WIN32
+-    WSADATA wsaData;
+-    int iResult;
+-
+-    SOCKET ListenSocket = INVALID_SOCKET;
+-
+-    struct addrinfo *result = NULL;
+-    struct addrinfo hints;
+-
+-    // Initialize Winsock
+-    iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+-    if (iResult != 0) {
+-        printf("WSAStartup failed with error: %d\n", iResult);
+-    }
+-
+-    ZeroMemory(&hints, sizeof(hints));
+-    hints.ai_family = AF_INET;
+-    hints.ai_socktype = SOCK_STREAM;
+-    hints.ai_protocol = IPPROTO_TCP;
+-    hints.ai_flags = AI_PASSIVE;
+-
+-    // Resolve the server address and port
+-    iResult = getaddrinfo(NULL, "0", &hints, &result);
+-    if (iResult != 0) {
+-        printf("getaddrinfo failed with error: %d\n", iResult);
+-        WSACleanup();
+-    }
+-
+-    // Create a SOCKET for connecting to server
+-    ListenSocket = socket(result->ai_family, result->ai_socktype, result->ai_protocol);
+-    if (ListenSocket == INVALID_SOCKET) {
+-        printf("socket failed with error: %ld\n", WSAGetLastError());
+-        freeaddrinfo(result);
+-        WSACleanup();
+-    }
+-
+-    // Setup the TCP listening socket
+-    iResult = bind(ListenSocket, result->ai_addr, (int)result->ai_addrlen);
+-    if (iResult == SOCKET_ERROR) {
+-        printf("bind failed with error: %d\n", WSAGetLastError());
+-        freeaddrinfo(result);
+-        closesocket(ListenSocket);
+-        WSACleanup();
+-    }
+-
+-    sockaddr* connected_addr = new sockaddr();
+-    USHORT port = 0;
+-    int namelength = sizeof(sockaddr);
+-    iResult = getsockname(ListenSocket, connected_addr, &namelength);
+-    if (iResult == SOCKET_ERROR) {
+-        printf("getsockname failed with error: %d\n", WSAGetLastError());
+-    } else if (connected_addr->sa_family == AF_INET) {
+-        port = ((struct sockaddr_in*)connected_addr)->sin_port;
+-    }
+-    delete connected_addr;
+-
+-    freeaddrinfo(result);
+-
+-    iResult = listen(ListenSocket, SOMAXCONN);
+-    if (iResult == SOCKET_ERROR) {
+-        printf("listen failed with error: %d\n", WSAGetLastError());
+-        closesocket(ListenSocket);
+-        WSACleanup();
+-    }
+-
+-    wsaData;
+-    pipeFileDescriptors_[0] = INVALID_SOCKET;
+-    struct addrinfo *ptr = NULL;
+-
+-    // Initialize Winsock
+-    iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
+-    if (iResult != 0) {
+-        printf("WSAStartup failed with error: %d\n", iResult);
+-    }
+-
+-    ZeroMemory(&hints, sizeof(hints));
+-    hints.ai_family = AF_UNSPEC;
+-    hints.ai_socktype = SOCK_STREAM;
+-    hints.ai_protocol = IPPROTO_TCP;
+-
+-    // Resolve the server address and port
+-    iResult = getaddrinfo("127.0.0.1", std::to_string(ntohs(port)).c_str(), &hints, &result);
+-    if (iResult != 0) {
+-        printf("getaddrinfo failed with error: %d\n", iResult);
+-        WSACleanup();
+-    }
+-
+-    // Attempt to connect to an address until one succeeds
+-    for (ptr = result; ptr != NULL; ptr = ptr->ai_next) {
+-
+-        // Create a SOCKET for connecting to server
+-        pipeFileDescriptors_[0] = socket(ptr->ai_family, ptr->ai_socktype,
+-            ptr->ai_protocol);
+-        if (pipeFileDescriptors_[0] == INVALID_SOCKET) {
+-            printf("socket failed with error: %ld\n", WSAGetLastError());
+-            WSACleanup();
+-        }
+-
+-        // Connect to server.
+-        iResult = connect(pipeFileDescriptors_[0], ptr->ai_addr, (int)ptr->ai_addrlen);
+-        if (iResult == SOCKET_ERROR) {
+-            printf("connect failed with error: %ld\n", WSAGetLastError());
+-            closesocket(pipeFileDescriptors_[0]);
+-            pipeFileDescriptors_[0] = INVALID_SOCKET;
+-            continue;
+-        }
+-        break;
+-    }
+-
+-    freeaddrinfo(result);
+-
+-    if (pipeFileDescriptors_[0] == INVALID_SOCKET) {
+-        printf("Unable to connect to server!\n");
+-        WSACleanup();
++#if defined(__QNX__)
++    int fds[2];
++    if (pipe(fds) == -1) {
++        std::perror(__func__);
+     }
++    readFd_  = fds[0];
++    writeFd_ = fds[1];
++    pollFileDescriptor_.fd = readFd_;
+ 
+-    // Accept a client socket
+-    pipeFileDescriptors_[1] = accept(ListenSocket, NULL, NULL);
+-    if (pipeFileDescriptors_[1] == INVALID_SOCKET) {
+-        printf("accept failed with error: %d\n", WSAGetLastError());
+-        closesocket(ListenSocket);
+-        WSACleanup();
+-    }
+-    pollFileDescriptor_.fd = pipeFileDescriptors_[0];
+ #else
+     eventFd_ = eventfd(0, EFD_NONBLOCK | EFD_SEMAPHORE);
+     if (eventFd_ == -1) {
+@@ -170,106 +71,82 @@
+     }
+     pollFileDescriptor_.fd = eventFd_;
+ #endif
++
+     pollFileDescriptor_.events = POLLIN;
+ 
+     connection_ = _connection;
+ 
+-    auto itsConfiguration = Configuration::get();
+-    max_processing_time_ = itsConfiguration->getMaxProcessingTime(_connection->getName());
+-    max_queue_size_ = itsConfiguration->getMaxQueueSize(_connection->getName());
++    auto cfg = Configuration::get();
++    max_processing_time_ = cfg->getMaxProcessingTime(_connection->getName());
++    max_queue_size_      = cfg->getMaxQueueSize(_connection->getName());
+ 
+     is_supervising_ = (max_processing_time_ > 0 || max_queue_size_ > 0);
+-    supervisor_ = std::make_shared<std::thread>(
+-            std::bind(&Watch::supervise, this));
++    supervisor_ = std::make_shared<std::thread>(std::bind(&Watch::supervise, this));
+ }
+ 
+ Watch::~Watch() {
+     {
+-        std::lock_guard<std::mutex> itsLock(superviseMutex_);
++        std::lock_guard<std::mutex> lock(superviseMutex_);
+         is_supervising_ = false;
+         superviseCondition_.notify_one();
+     }
++
+     if (supervisor_ && supervisor_->joinable())
+         supervisor_->join();
+ 
+-#ifdef _WIN32
+-    // shutdown the connection since no more data will be sent
+-    int iResult = shutdown(pipeFileDescriptors_[0], SD_SEND);
+-    if (iResult == SOCKET_ERROR) {
+-        printf("shutdown failed with error: %d\n", WSAGetLastError());
+-        closesocket(pipeFileDescriptors_[0]);
+-        WSACleanup();
+-    }
+-
+-    // cleanup
+-    closesocket(pipeFileDescriptors_[0]);
+-    WSACleanup();
++#if defined(__QNX__)
++    close(readFd_);
++    close(writeFd_);
+ #else
+     close(eventFd_);
+ #endif
+ }
+ 
+ void Watch::dispatch(unsigned int) {
++    // intentionally empty (same as original)
+ }
+ 
+ const pollfd& Watch::getAssociatedFileDescriptor() {
+     return pollFileDescriptor_;
+ }
+ 
+-#ifdef _WIN32
+-const HANDLE& Watch::getAssociatedEvent() {
+-    return wsaEvent_;
+-}
+-#endif
+-
+ const std::vector<CommonAPI::DispatchSource*>& Watch::getDependentDispatchSources() {
+-    std::lock_guard<std::mutex> itsLock(dependentDispatchSourcesMutex_);
++    std::lock_guard<std::mutex> lock(dependentDispatchSourcesMutex_);
+     return dependentDispatchSources_;
+ }
+ 
+-void Watch::addDependentDispatchSource(CommonAPI::DispatchSource* _dispatchSource) {
+-    std::lock_guard<std::mutex> itsLock(dependentDispatchSourcesMutex_);
+-    dependentDispatchSources_.push_back(_dispatchSource);
++void Watch::addDependentDispatchSource(CommonAPI::DispatchSource* src) {
++    std::lock_guard<std::mutex> lock(dependentDispatchSourcesMutex_);
++    dependentDispatchSources_.push_back(src);
+ }
+ 
+-void Watch::removeDependentDispatchSource(CommonAPI::DispatchSource* _dispatchSource) {
+-    std::lock_guard<std::mutex> itsLock(dependentDispatchSourcesMutex_);
+-    std::vector<CommonAPI::DispatchSource*>::iterator it;
+-
+-    for (it = dependentDispatchSources_.begin(); it != dependentDispatchSources_.end(); it++) {
+-        if ( (*it) == _dispatchSource ) {
+-            dependentDispatchSources_.erase(it);
+-            break;
+-        }
+-    }
++void Watch::removeDependentDispatchSource(CommonAPI::DispatchSource* src) {
++    std::lock_guard<std::mutex> lock(dependentDispatchSourcesMutex_);
++    auto it = std::find(dependentDispatchSources_.begin(), dependentDispatchSources_.end(), src);
++    if (it != dependentDispatchSources_.end())
++        dependentDispatchSources_.erase(it);
+ }
+ 
+-void Watch::pushQueue(std::shared_ptr<QueueEntry> _queueEntry) {
++void Watch::pushQueue(std::shared_ptr<QueueEntry> entry) {
+     {
+-        std::lock_guard<std::mutex> itsLock(lastProcessingMutex_);
+-        // Record the time when the first entry is queued so that the supervisor can detect
+-        // when the main loop becomes blocked.
+-        if (!lastProcessing_.time_since_epoch().count()) {
++        std::lock_guard<std::mutex> lock(lastProcessingMutex_);
++        if (!lastProcessing_.time_since_epoch().count())
+             lastProcessing_ = std::chrono::steady_clock::now();
+-        }
+     }
+ 
+     {
+-        std::lock_guard<std::mutex> itsLock(queueMutex_);
+-        queue_.push(_queueEntry);
++        std::lock_guard<std::mutex> lock(queueMutex_);
++        queue_.push(entry);
+     }
+ 
+-#ifdef _WIN32
+-    // Send an initial buffer
+-    char *sendbuf = "1";
+-
+-    int iResult = send(pipeFileDescriptors_[1], sendbuf, (int)strlen(sendbuf), 0);
+-    if (iResult == SOCKET_ERROR) {
+-        int error = WSAGetLastError();
+-
+-        if (error != WSANOTINITIALISED) {
+-            printf("send failed with error: %d\n", error);
++#if defined(__QNX__)
++    uint64_t one = 1;
++    while (write(writeFd_, &one, sizeof(one)) == -1) {
++        if (errno != EAGAIN && errno != EINTR) {
++            std::perror(__func__);
++            break;
+         }
++        std::this_thread::yield();
+     }
+ #else
+     while (write(eventFd_, &eventFdValue_, sizeof(eventFdValue_)) == -1) {
+@@ -283,60 +160,44 @@
+ }
+ 
+ void Watch::popQueue() {
+-#ifdef _WIN32
+-    // Receive until the peer closes the connection
+-    int iResult;
+-    char recvbuf[1];
+-    int recvbuflen = 1;
+-
+-    iResult = recv(pipeFileDescriptors_[0], recvbuf, recvbuflen, 0);
+-    if (iResult > 0) {
+-        //printf("Bytes received from %d: %d\n", wakeFd_.fd, iResult);
+-    }
+-    else if (iResult == 0) {
+-        printf("Connection closed\n");
+-    }
+-    else {
+-        printf("recv failed with error: %d\n", WSAGetLastError());
+-    }
++    uint64_t readValue(0);
++
++#if defined(__QNX__)
++    while (read(readFd_, &readValue, sizeof(readValue)) == -1) {
+ #else
+-    std::uint64_t readValue(0);
+     while (read(eventFd_, &readValue, sizeof(readValue)) == -1) {
++#endif
+         if (errno != EAGAIN && errno != EINTR) {
+             std::perror(__func__);
+             break;
+         }
+         std::this_thread::yield();
+     }
+-#endif
+ 
+     {
+-        std::lock_guard<std::mutex> itsLock(queueMutex_);
++        std::lock_guard<std::mutex> lock(queueMutex_);
+         queue_.pop();
+     }
+ }
+ 
+ std::shared_ptr<QueueEntry> Watch::frontQueue() {
+-    std::lock_guard<std::mutex> itsLock(queueMutex_);
+-
++    std::lock_guard<std::mutex> lock(queueMutex_);
+     return queue_.front();
+ }
+ 
+ bool Watch::emptyQueue() {
+-    std::lock_guard<std::mutex> itsLock(queueMutex_);
+-
++    std::lock_guard<std::mutex> lock(queueMutex_);
+     return queue_.empty();
+ }
+ 
+-void Watch::processQueueEntry(std::shared_ptr<QueueEntry> _queueEntry) {
+-    if (auto connection = connection_.lock()) {
+-        _queueEntry->process(connection);
++void Watch::processQueueEntry(std::shared_ptr<QueueEntry> entry) {
++    if (auto conn = connection_.lock()) {
++        entry->process(conn);
+ 
+-        std::lock_guard<std::mutex> itsLock(lastProcessingMutex_);
++        std::lock_guard<std::mutex> lock(lastProcessingMutex_);
+         lastProcessing_ = std::chrono::steady_clock::now();
+     }
+ }
+-
+ void Watch::supervise() {
+     std::string applicationName = "<unknown>";
+     {
+@@ -409,5 +270,6 @@
+     }
+ }
+ 
++
+ } // namespace SomeIP
+ } // namespace CommonAPI
