@@ -1,0 +1,28 @@
+import "platform:/plugin/org.genivi.commonapi.someip/deployment/CommonAPI-4-SOMEIP_deployment_spec.fdepl"
+import "FileTransfer.fidl"
+
+define org.genivi.commonapi.someip.deployment for interface filetransfer.example.FileTransfer {
+    SomeIpServiceID = 0x6000
+
+    method requestFile {
+        SomeIpMethodID = 0x0001
+        SomeIpReliable = true
+    }
+
+    broadcast fileChunk {
+        SomeIpEventID = 0x8020
+        SomeIpReliable = true
+        SomeIpEventGroups = { 0x2000 }
+    }
+}
+
+define org.genivi.commonapi.someip.deployment for provider as Service {
+    instance filetransfer.example.FileTransfer {
+        InstanceId = "filetransfer.example.FileTransfer"
+
+        SomeIpInstanceID = 0x7000
+        SomeIpUnicastAddress = "127.0.0.1"
+        SomeIpReliableUnicastPort = 30509
+        SomeIpUnreliableUnicastPort = 30509
+    }
+}

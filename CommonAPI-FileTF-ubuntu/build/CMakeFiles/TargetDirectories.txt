@@ -1,0 +1,4 @@
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/CommonAPI-FileTF-ubuntu/build/CMakeFiles/FileTransferServer.dir
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/CommonAPI-FileTF-ubuntu/build/CMakeFiles/FileTransferClient.dir
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/CommonAPI-FileTF-ubuntu/build/CMakeFiles/edit_cache.dir
+/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/QNX-Bridge-OTA/CommonAPI-FileTF-ubuntu/build/CMakeFiles/rebuild_cache.dir

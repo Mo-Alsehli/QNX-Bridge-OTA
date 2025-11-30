@@ -1,0 +1,20 @@
+package filetransfer.example
+
+interface FileTransfer {
+    version { major 0 minor 1 }
+
+    method requestFile {
+        in { 
+            String fileName
+        }
+        out { Boolean accepted}
+    }
+
+    broadcast fileChunk {
+        out {
+            UInt32 chunkIndex
+            ByteBuffer data
+            Boolean lastChunk
+        }
+    }
+}
