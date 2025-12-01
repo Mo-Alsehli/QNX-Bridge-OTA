@@ -73,13 +73,13 @@ Your QNX VM must use:
 Example QNX command:
 
 ```bash
-ifconfig wm0 192.168.10.3 netmask 255.255.255.0 up
+ifconfig vmx0 192.168.10.3 netmask 255.255.255.0 up
 ```
 
 Multicast routing may be required:
 
 ```bash
-route add -net 224.224.224.245 wm0
+route add -net 224.224.224.245 vmx0
 ```
 
 ---
