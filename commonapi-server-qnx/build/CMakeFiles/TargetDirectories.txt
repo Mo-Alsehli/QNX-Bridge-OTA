@@ -1,3 +1,0 @@
-/home/mmagdi/qnxprojects/commonapi-server-qnx/build/CMakeFiles/HelloWorldService.dir
-/home/mmagdi/qnxprojects/commonapi-server-qnx/build/CMakeFiles/edit_cache.dir
-/home/mmagdi/qnxprojects/commonapi-server-qnx/build/CMakeFiles/rebuild_cache.dir
