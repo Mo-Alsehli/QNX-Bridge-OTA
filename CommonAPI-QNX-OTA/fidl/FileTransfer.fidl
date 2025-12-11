@@ -1,0 +1,40 @@
+package filetransfer.example
+
+
+
+interface FileTransfer {
+    version { major 0 minor 1 }
+
+    struct UpdateInfo {
+        Boolean exists
+        Boolean isNew
+        UInt32 newVersion
+        UInt64 size
+        UInt32 crc
+        Int32 resultCode
+    }
+
+    method requestUpdate{
+        in { 
+            UInt32 currentVersion    
+        }
+        out { UpdateInfo info  }
+    }
+
+    method startTransfer {
+        in {
+            String fileName
+        }
+        out {
+            Boolean accepted
+        }
+    }
+
+    broadcast fileChunk {
+        out {
+            UInt32 chunkIndex
+            ByteBuffer data
+            Boolean lastChunk
+        }
+    }
+}

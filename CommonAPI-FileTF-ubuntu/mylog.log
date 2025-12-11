@@ -108,3 +108,48 @@
 [CAPI][DEBUG] Loading interface library "libFileTransfer-someip.so" failed (libFileTransfer-someip.so: cannot open shared object file: No such file or directory)
 [CAPI][DEBUG] Loading interface library failed, using default factory now.
 [CAPI][INFO] Registering stub for "local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer"
+[CAPI][INFO] Loading configuration file /etc//commonapi-someip.ini
+[CAPI][INFO] Loading configuration file 'commonapi4someip.ini'
+[CAPI][INFO] Using default binding 'someip'
+[CAPI][INFO] Using default shared library folder '/usr/local/lib/commonapi'
+[CAPI][DEBUG] Added address mapping: local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer <--> [6000.7000(0.1)]
+[CAPI][VERBOSE] Registering function for creating "filetransfer.example.FileTransfer:v0_1" proxy.
+[CAPI][INFO] Registering function for creating "filetransfer.example.FileTransfer:v0_1" stub adapter.
+[CAPI][DEBUG] Loading library for local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer stub.
+[CAPI][DEBUG] Loading interface library "libFileTransfer-someip.so" failed (libFileTransfer-someip.so: cannot open shared object file: No such file or directory)
+[CAPI][DEBUG] Loading interface library failed, using default factory now.
+[CAPI][INFO] Registering stub for "local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer"
+[CAPI][INFO] Loading configuration file /etc//commonapi-someip.ini
+[CAPI][INFO] Loading configuration file /etc//commonapi-someip.ini
+[CAPI][INFO] Loading configuration file 'commonapi4someip.ini'
+[CAPI][INFO] Using default binding 'someip'
+[CAPI][INFO] Using default shared library folder '/usr/local/lib/commonapi'
+[CAPI][DEBUG] Added address mapping: local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer <--> [6000.7000(0.1)]
+[CAPI][VERBOSE] Registering function for creating "filetransfer.example.FileTransfer:v0_1" proxy.
+[CAPI][INFO] Registering function for creating "filetransfer.example.FileTransfer:v0_1" stub adapter.
+[CAPI][DEBUG] Loading library for local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer proxy.
+[CAPI][DEBUG] Loading interface library "libFileTransfer-someip.so" failed (libFileTransfer-someip.so: cannot open shared object file: No such file or directory)
+[CAPI][DEBUG] Loading interface library failed, using default factory now.
+[CAPI][VERBOSE] Creating proxy for "local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer"
+[CAPI][INFO] Loading configuration file /etc//commonapi-someip.ini
+[CAPI][INFO] Loading configuration file 'commonapi4someip.ini'
+[CAPI][INFO] Using default binding 'someip'
+[CAPI][INFO] Using default shared library folder '/usr/local/lib/commonapi'
+[CAPI][DEBUG] Added address mapping: local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer <--> [6000.7000(0.1)]
+[CAPI][VERBOSE] Registering function for creating "filetransfer.example.FileTransfer:v0_1" proxy.
+[CAPI][INFO] Registering function for creating "filetransfer.example.FileTransfer:v0_1" stub adapter.
+[CAPI][DEBUG] Loading library for local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer stub.
+[CAPI][DEBUG] Loading interface library "libFileTransfer-someip.so" failed (libFileTransfer-someip.so: cannot open shared object file: No such file or directory)
+[CAPI][DEBUG] Loading interface library failed, using default factory now.
+[CAPI][INFO] Registering stub for "local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer"
+[CAPI][INFO] Loading configuration file /etc//commonapi-someip.ini
+[CAPI][INFO] Loading configuration file 'commonapi4someip.ini'
+[CAPI][INFO] Using default binding 'someip'
+[CAPI][INFO] Using default shared library folder '/usr/local/lib/commonapi'
+[CAPI][DEBUG] Added address mapping: local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer <--> [6000.7000(0.1)]
+[CAPI][VERBOSE] Registering function for creating "filetransfer.example.FileTransfer:v0_1" proxy.
+[CAPI][INFO] Registering function for creating "filetransfer.example.FileTransfer:v0_1" stub adapter.
+[CAPI][DEBUG] Loading library for local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer proxy.
+[CAPI][DEBUG] Loading interface library "libFileTransfer-someip.so" failed (libFileTransfer-someip.so: cannot open shared object file: No such file or directory)
+[CAPI][DEBUG] Loading interface library failed, using default factory now.
+[CAPI][VERBOSE] Creating proxy for "local:filetransfer.example.FileTransfer:v0_1:filetransfer.example.FileTransfer"

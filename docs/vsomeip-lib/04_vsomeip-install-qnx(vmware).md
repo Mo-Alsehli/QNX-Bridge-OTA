@@ -76,15 +76,7 @@ Expected output:
 vsomeip requires Boost 1.78.0 with QNX-specific patches.
 
 ### 1. Download Boost Source
-**Option A: Using tarball (Recommended - Faster)**
-```bash
-cd ~/qnxprojects
-wget https://archives.boost.io/release/1.78.0/source/boost_1_78_0.tar.gz
-tar -xvf boost_1_78_0.tar.gz
-mv boost_1_78_0 boost
-```
-
-**Option B: Using Git (Slower)**
+**Option A: Using Git (Recommended - Slower)**
 ```bash
 cd ~/qnxprojects
 git clone https://github.com/boostorg/boost.git
@@ -93,11 +85,23 @@ git checkout boost-1.78.0
 git submodule update --init --recursive --jobs 8
 ```
 
+**Option B: Using tarball (Faster)**
+```bash
+cd ~/qnxprojects
+wget https://archives.boost.io/release/1.78.0/source/boost_1_78_0.tar.gz
+tar -xvf boost_1_78_0.tar.gz
+mv boost_1_78_0 boost
+```
+
+
+
 ### 2. Apply QNX Patches
 
 **Interprocess patch:**
 ```bash
 cd ~/qnxprojects/boost/libs/interprocess
+git checkout boost-1.78.0
+git submodule update --init --recursive --jobs 8
 git apply $WORKSPACE/build-files/ports/boost/interprocess_1.78.0_qnx_7.1.patch
 cd -
 ```

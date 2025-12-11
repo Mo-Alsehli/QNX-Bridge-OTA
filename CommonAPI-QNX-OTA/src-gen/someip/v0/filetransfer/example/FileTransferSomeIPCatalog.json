@@ -1,0 +1,8 @@
+{
+    "filetransfer.example.FileTransfer" : {
+        "service_id": 24576,
+        "instances" : {
+            "filetransfer.example.FileTransfer": 28672
+        }
+    }
+}
