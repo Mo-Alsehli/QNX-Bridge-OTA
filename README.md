@@ -3,6 +3,9 @@
 **Over-The-Air (OTA) Software Update System using CommonAPI & SOME/IP**
 
 ---
+![Project Working](https://github.com/Mo-Alsehli/QNX-Bridge-OTA/blob/master/docs/system-architecture/Project-working.png)
+
+![Project Explaind](https://github.com/Mo-Alsehli/QNX-Bridge-OTA/blob/master/docs/system-architecture/Project-explained.png)
 
 ## 1. Project Overview
 
