@@ -1,8 +1,10 @@
 # QNX-Bridge-OTA
 
 <div align="center">
-
 **Enterprise-Grade Over-The-Air Update System for Heterogeneous Embedded Platforms**
+
+![project working](https://github.com/Mo-Alsehli/QNX-Bridge-OTA/blob/master/docs/system-architecture/Project-working.png)
+
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![QNX](https://img.shields.io/badge/QNX-RTOS-blue.svg)](https://blackberry.qnx.com/)
@@ -51,19 +53,19 @@
 ## 🏗 Architecture
 
 ```
-┌──────────────┐         SOME/IP          ┌──────────────┐
+┌──────────────┐         SOME/IP            ┌──────────────┐
 │              │◄──────────────────────────►│              │
-│  QNX Gateway │  Service Discovery (SD)   │  RPi Target  │
-│   (Server)   │  Request/Response/Events  │   (Client)   │
+│  QNX Gateway │  Service Discovery (SD)    │  RPi Target  │
+│   (Server)   │  Request/Response/Events   │   (Client)   │
 │              │                            │              │
-└──────┬───────┘                            └──────────────┘
-       │
-       │ CommonAPI Interface
-       │
-┌──────▼───────┐
-│   Qt6 GUI    │
-│  Monitoring  │
-└──────────────┘
+└──────────────┘                            └───────┬──────┘
+                                                    │
+                                                    │ CommonAPI Interface
+                                                    │
+                                             ┌──────▼───────┐
+                                             │   Qt6 GUI    │
+                                             │  Monitoring  │
+                                             └──────────────┘
 ```
 
 ### Component Interaction
@@ -88,68 +90,13 @@ sequenceDiagram
     RPi->>RPi: Verify & Apply Update
     RPi-->>QNX: Update Success
 ```
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-
-```bash
-# Install dependencies (Ubuntu)
-sudo apt update
-sudo apt install -y cmake build-essential libboost-all-dev
-
-# Clone repository
-git clone https://github.com/Mo-Alsehli/QNX-Bridge-OTA.git
-cd QNX-Bridge-OTA
-```
-
-### Build & Run
-
-#### 1. Ubuntu Development Setup
-```bash
-cd CommonAPI-FileTF-ubuntu
-mkdir -p build && cd build
-cmake ..
-make -j$(nproc)
-
-# Run server
-./FileTransferServer &
-
-# Run client
-./FileTransferClient
-```
-
-#### 2. QNX Gateway Deployment
-```bash
-cd CommonAPI-QNX-OTA
-mkdir -p build && cd build
-cmake -DCMAKE_TOOLCHAIN_FILE=../../CommonAPI-Patchs/toolchain-qnx.cmake ..
-make
-
-# Transfer to QNX VM and run
-scp FileTransferServer qnx-vm:/tmp/
-ssh qnx-vm "/tmp/FileTransferServer"
-```
-
-#### 3. Raspberry Pi Target (Yocto)
-```bash
-# Build custom Yocto image with OTA support
-cd yocto-meta-layers/meta-ota
-bitbake core-image-ota
-
-# Flash to SD card
-dd if=tmp/deploy/images/raspberrypi3-64/core-image-ota.wic of=/dev/sdX bs=4M
-```
-
 ---
 
 ## 📂 Repository Structure
 
 ```
 QNX-Bridge-OTA/
-├── CommonAPI-QNX-OTA/           # 🎯 Primary OTA Implementation
+├── CommonAPI-QNX-OTA/           # 🎯 Main OTA Implementation
 │   ├── src/                     # Client & Server logic
 │   ├── fidl/                    # Franca IDL definitions
 │   ├── src-gen/                 # Generated CommonAPI code
@@ -162,12 +109,12 @@ QNX-Bridge-OTA/
 ├── GUI/                         # 🖥 Qt6 Monitoring Interface
 │   ├── cards/                   # State-based UI cards
 │   ├── components/              # Reusable UI components
-│   └── backend/                 # CommonAPI integration
+│   └── backend/                 # CommonAPI & client backend integration
 │
 ├── docs/                        # 📚 Comprehensive Documentation
 │   ├── CommonAPI/               # Installation & usage guides
 │   ├── SOME-IP/                 # Protocol specifications
-│   ├── Service-Discovery/       # AUTOSAR SD documentation
+│   ├── Service-Discovery/       # QNX, VsomeIP and CommonAPI documentation
 │   └── system-architecture/     # Diagrams & requirements
 │
 ├── yocto-meta-layers/           # 🔧 Custom Yocto Layers
@@ -175,7 +122,7 @@ QNX-Bridge-OTA/
 │   ├── meta-gpio-led/           # Hardware drivers
 │   └── meta-mmagdi-distro/      # Custom distribution
 │
-└── CommonAPI-Patchs/            # QNX compatibility patches
+└── CommonAPI-Patchs/            # QNX compatibility patches for CommonAPI Libraries
 ```
 
 ---
@@ -215,9 +162,9 @@ Detailed technical documentation is available in the [`docs/`](docs/) directory:
 <td>
 
 **Platforms**
-- QNX 7.1 RTOS
+- QNX RTOS
 - Yocto Project (Kirkstone)
-- Ubuntu 22.04 LTS
+- Ubuntu 24 LTS
 
 </td>
 </tr>
@@ -227,7 +174,7 @@ Detailed technical documentation is available in the [`docs/`](docs/) directory:
 **Build Tools**
 - CMake 3.28+
 - GCC/G++ 11+
-- QNX SDP 7.1 Toolchain
+- QNX  SDP 8.0 Toolchain
 
 </td>
 <td>
@@ -243,19 +190,6 @@ Detailed technical documentation is available in the [`docs/`](docs/) directory:
 
 ---
 
-## 🎓 Learning Objectives
-
-This project demonstrates:
-
-✅ **Service-Oriented Architecture** in embedded systems  
-✅ **Inter-Process Communication** using SOME/IP  
-✅ **Cross-Platform Development** (RTOS ↔ Linux)  
-✅ **OTA Update Patterns** with rollback support  
-✅ **Build System Integration** (CMake, Yocto)  
-✅ **Protocol Compliance** (AUTOSAR standards)
-
----
-
 ## 📊 System Workflow
 
 1. **Service Discovery**: Raspberry Pi discovers QNX OTA service via SOME/IP-SD
@@ -268,30 +202,12 @@ This project demonstrates:
 
 ---
 
-## 🤝 Contributing
-
-Contributions are welcome! This project is designed for educational and research purposes.
-
-### Development Workflow
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/improvement`)
-3. Commit changes (`git commit -am 'Add new feature'`)
-4. Push to branch (`git push origin feature/improvement`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
 ## 🔗 References
 
-- [AUTOSAR SOME/IP Specification](https://www.autosar.org/)
-- [CommonAPI Documentation](https://covesa.github.io/capicxx-core-tools/)
-- [QNX Software Development Platform](https://blackberry.qnx.com/)
+- [vsomeip in 10 minutes](https://github.com/COVESA/vsomeip/wiki/vsomeip-in-10-minutes)
+- [CommonAPI Documentation](https://github.com/COVESA/capicxx-core-tools/wiki)
+- [QNX Software Development Platform](https://www.qnx.com/developers/docs/8.0/com.qnx.doc.qnxsdp.nav/topic/bookset.html)
+- [Video Reference: QNX-Raspberry Pi Integration Overview](https://youtu.be/s8_rvkSfj10?si=fwmeZ1JSDAjHB9g6)
 - [Yocto Project](https://www.yoctoproject.org/)
 
 ---
