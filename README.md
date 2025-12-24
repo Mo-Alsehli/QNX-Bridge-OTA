@@ -1,6 +1,7 @@
 # QNX-Bridge-OTA
 
 <div align="center">
+
 **Enterprise-Grade Over-The-Air Update System for Heterogeneous Embedded Platforms**
 
 ![project working](https://github.com/Mo-Alsehli/QNX-Bridge-OTA/blob/master/docs/system-architecture/Project-working.png)
@@ -11,7 +12,7 @@
 [![CommonAPI](https://img.shields.io/badge/CommonAPI-SOME%2FIP-green.svg)](https://covesa.github.io/capicxx-core-tools/)
 [![Yocto](https://img.shields.io/badge/Yocto-Embedded%20Linux-orange.svg)](https://www.yoctoproject.org/)
 
-[Features](#-features) • [Architecture](#-architecture) • [Quick Start](#-quick-start) • [Documentation](#-documentation)
+[Features](#-features) • [Architecture](#-architecture) • [Documentation](#-documentation)
 
 </div>
 
