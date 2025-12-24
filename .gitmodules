@@ -1,3 +1,6 @@
 [submodule "GUI"]
 	path = GUI
 	url = https://github.com/Mo-Alsehli/Raspberry-Pi-Update-OTA-GUI.git
+[submodule "yocto-meta-layers"]
+	path = yocto-meta-layers
+	url = https://github.com/Mo-Alsehli/Custom_Yocto_Build.git
