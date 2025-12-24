@@ -1,0 +1,3 @@
+[submodule "GUI"]
+	path = GUI
+	url = https://github.com/Mo-Alsehli/Raspberry-Pi-Update-OTA-GUI.git
