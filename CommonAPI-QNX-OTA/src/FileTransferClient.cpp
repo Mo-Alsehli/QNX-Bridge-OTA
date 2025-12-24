@@ -1,6 +1,6 @@
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>  // mkdir()
+#include <unistd.h>  
 
 #include <CommonAPI/CommonAPI.hpp>
 #include <chrono>
@@ -12,6 +12,9 @@
 #include <v0/filetransfer/example/FileTransferProxy.hpp>
 
 namespace ft = v0::filetransfer::example;
+static const size_t CHUNK_SIZE = 64 * 1024;  // 64KB
+static size_t UPDATE_SIZE;
+ft::FileTransfer::UpdateInfo info;
 
 // helper to create directory if missing
 void ensureClientDir() {
@@ -33,6 +36,23 @@ void ensureClientDir() {
     }
 }
 
+// Read uint32 from file helper
+bool readUint32FromFile(const std::string& path, uint32_t& valueOut) {
+    std::ifstream in(path);
+    if (!in.is_open()) return false;
+
+    std::string s;
+    std::getline(in, s);
+    if (s.empty()) return false;
+
+    std::stringstream ss(s);
+    if (s.find("0x") == 0 || s.find("0X") == 0)
+        ss >> std::hex >> valueOut;
+    else
+        ss >> std::dec >> valueOut;
+
+    return !ss.fail();
+}
 
 class FileReceiver {
    public:
@@ -51,9 +71,14 @@ class FileReceiver {
             return;
         }
 
+        double progress = (static_cast<double>(index * CHUNK_SIZE) / static_cast<double>(info.getSize())) * 100.0;
+
+        std::cout << "\r[Client] Downloading " << static_cast<int>(progress) << "%" << std::flush;
+
         ofs_.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
 
-        //std::cout << "[Client] Received Chunk " << index << " (" << data.size() << " bytes)" << (lastChunk ? " [LAST]" : "") << std::endl;
+        // std::cout << "[Client] Received Chunk " << index << " (" << data.size() << " bytes)" << (lastChunk ? " [LAST]" : "") <<
+        // std::endl;
 
         if (lastChunk) {
             std::cout << "[Client] All chunks received. File saved to: " << outPath_ << std::endl;
@@ -72,7 +97,7 @@ int main() {
     CommonAPI::Runtime::setProperty("LibraryBase", "FileTransfer");
     auto runtime = CommonAPI::Runtime::get();
 
-    std::shared_ptr<ft::FileTransferProxy<> > proxy;
+    std::shared_ptr<ft::FileTransferProxy<>> proxy;
 
     while (!proxy) {
         proxy = runtime->buildProxy<ft::FileTransferProxy>("local", "filetransfer.example.FileTransfer", "client-sample");
@@ -88,11 +113,12 @@ int main() {
     proxy->getFileChunkEvent().subscribe(
         [&](uint32_t index, const CommonAPI::ByteBuffer& data, bool last) { receiver.onChunk(index, data, last); });
 
-    uint32_t currentVersion = 1;
+    uint32_t currentVersion = 0;
+    readUint32FromFile("data/client/update.version", currentVersion);
     CommonAPI::CallStatus status;
-    ft::FileTransfer::UpdateInfo info;
 
     proxy->requestUpdate(currentVersion, status, info);
+    UPDATE_SIZE = info.getSize();
 
     if (status != CommonAPI::CallStatus::SUCCESS) {
         std::cerr << "[Client] requestUpdate failed!" << std::endl;
@@ -112,11 +138,8 @@ int main() {
     std::cout << "[Client] New update available. Starting transfer..." << std::endl;
 
     bool accepted = false;
-    std::cout << "[Client] Info - New Version: " << info.getNewVersion()
-              << ", Size: " << info.getSize()
-              << ", CRC: 0x" << std::hex << info.getCrc() << std::dec
-              << ", Result Code: " << info.getResultCode()
-              << std::endl;
+    std::cout << "[Client] Info - New Version: " << info.getNewVersion() << ", Size: " << info.getSize() << ", CRC: 0x" << std::hex
+              << info.getCrc() << std::dec << ", Result Code: " << info.getResultCode() << std::endl;
     proxy->startTransfer("qnx_uefi.iso", status, accepted);
 
     if (!accepted) {
