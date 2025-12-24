@@ -13,19 +13,13 @@
 namespace ft = v0::filetransfer::example;
 
 static const std::string kUpdateDir = "data/server/";
-<<<<<<< HEAD
 static const std::string kUpdateImage = kUpdateDir + "rpi4-update.wic";
 static const std::string kUpdateVersion = kUpdateDir + "update.version";
 static const std::string kUpdateCrc = kUpdateDir + "update.crc";
-static const size_t CHUNK_SIZE = 64 * 1024;  // 64KB
-=======
-static const std::string kUpdateImage = kUpdateDir + "qnx_uefi.iso";
-static const std::string kUpdateVersion = kUpdateDir + "update.version";
-static const std::string kUpdateCrc = kUpdateDir + "update.crc";
-static const size_t CHUNK_SIZE = 4096;  // 4KB
->>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
 
-// Simple file-exists helper for C++14 (no filesystem)
+static const size_t CHUNK_SIZE = 64 * 1024;  // 64 KB
+
+// Simple file-exists helper (C++14 compatible)
 bool fileExists(const std::string& path) {
     struct stat st;
     return (stat(path.c_str(), &st) == 0 && S_ISREG(st.st_mode));
@@ -63,15 +57,15 @@ class FileTransferService : public ft::FileTransferStubDefault {
    public:
     FileTransferService() = default;
 
-    // Signature must match what StubDefault.hpp expects
-    virtual void requestUpdate(const std::shared_ptr<CommonAPI::ClientId> _client, uint32_t _currentVersion,
-                               requestUpdateReply_t _reply) override {
+    void requestUpdate(const std::shared_ptr<CommonAPI::ClientId> /*_client*/, uint32_t currentVersion,
+                       requestUpdateReply_t reply) override {
         ft::FileTransfer::UpdateInfo info;
 
         uint64_t fileSize = 0;
         uint32_t newVersion = 0;
         uint32_t crc = 0;
 
+        // Default response
         info.setExists(false);
         info.setIsNew(false);
         info.setNewVersion(0);
@@ -79,10 +73,10 @@ class FileTransferService : public ft::FileTransferStubDefault {
         info.setCrc(0);
         info.setResultCode(-1);
 
-        // File exists?
+        // Check image existence
         if (!fileExists(kUpdateImage)) {
             info.setResultCode(-10);
-            _reply(info);
+            reply(info);
             return;
         }
 
@@ -91,7 +85,7 @@ class FileTransferService : public ft::FileTransferStubDefault {
         // File size
         if (!getFileSize(kUpdateImage, fileSize)) {
             info.setResultCode(-11);
-            _reply(info);
+            reply(info);
             return;
         }
         info.setSize(fileSize);
@@ -99,7 +93,7 @@ class FileTransferService : public ft::FileTransferStubDefault {
         // Version file
         if (!readUint32FromFile(kUpdateVersion, newVersion)) {
             info.setResultCode(-12);
-            _reply(info);
+            reply(info);
             return;
         }
         info.setNewVersion(newVersion);
@@ -109,29 +103,27 @@ class FileTransferService : public ft::FileTransferStubDefault {
         info.setCrc(crc);
 
         // Version comparison
-        info.setIsNew(newVersion > _currentVersion);
+        info.setIsNew(newVersion > currentVersion);
         info.setResultCode(0);
 
-        std::cout << "[Service] requestUpdate(): client=" << _currentVersion << " new=" << newVersion << std::endl;
+        std::cout << "[Service] requestUpdate(): clientVersion=" << currentVersion << " newVersion=" << newVersion << std::endl;
 
-        _reply(info);
+        reply(info);
     }
 
-    virtual void startTransfer(const std::shared_ptr<CommonAPI::ClientId> _client, std::string _fileName,
-                               startTransferReply_t _reply) override {
-        const std::string filePath = kUpdateImage;
-
-        if (!fileExists(filePath)) {
-            std::cout << "[Service] startTransfer(): File missing\n";
-            _reply(false);
+    void startTransfer(const std::shared_ptr<CommonAPI::ClientId> /*_client*/, std::string /*_fileName*/,
+                       startTransferReply_t reply) override {
+        if (!fileExists(kUpdateImage)) {
+            std::cerr << "[Service] startTransfer(): update image missing" << std::endl;
+            reply(false);
             return;
         }
 
-        std::thread(&FileTransferService::sendChunks, this, filePath).detach();
+        std::thread(&FileTransferService::sendChunks, this, kUpdateImage).detach();
 
-        std::cout << "[Service] startTransfer(): streaming " << filePath << std::endl;
+        std::cout << "[Service] startTransfer(): streaming " << kUpdateImage << std::endl;
 
-        _reply(true);
+        reply(true);
     }
 
    private:
@@ -153,10 +145,9 @@ class FileTransferService : public ft::FileTransferStubDefault {
             bool lastChunk = (static_cast<size_t>(bytesRead) < CHUNK_SIZE);
             CommonAPI::ByteBuffer data(buffer.begin(), buffer.begin() + bytesRead);
 
-            std::cout << "[Service] Sending Chunk " << chunkIndex << " (" << bytesRead << " bytes)" << (lastChunk ? " [Last]" : "")
+            std::cout << "[Service] Sending chunk " << chunkIndex << " (" << bytesRead << " bytes)" << (lastChunk ? " [LAST]" : "")
                       << std::endl;
 
-            // This matches your Stub.hpp: fireFileChunkEvent(...)
             fireFileChunkEvent(chunkIndex, data, lastChunk);
             ++chunkIndex;
 

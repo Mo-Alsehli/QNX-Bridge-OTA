@@ -1,27 +1,22 @@
 #include <sys/stat.h>
 #include <sys/types.h>
-<<<<<<< HEAD
-#include <unistd.h>  
-=======
 #include <unistd.h>  // mkdir()
->>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
 
 #include <CommonAPI/CommonAPI.hpp>
 #include <chrono>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <thread>
 #include <v0/filetransfer/example/FileTransferProxy.hpp>
 
 namespace ft = v0::filetransfer::example;
-<<<<<<< HEAD
+
 static const size_t CHUNK_SIZE = 64 * 1024;  // 64KB
-static size_t UPDATE_SIZE;
+static size_t UPDATE_SIZE = 0;
 ft::FileTransfer::UpdateInfo info;
-=======
->>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
 
 // helper to create directory if missing
 void ensureClientDir() {
@@ -43,7 +38,6 @@ void ensureClientDir() {
     }
 }
 
-<<<<<<< HEAD
 // Read uint32 from file helper
 bool readUint32FromFile(const std::string& path, uint32_t& valueOut) {
     std::ifstream in(path);
@@ -61,8 +55,6 @@ bool readUint32FromFile(const std::string& path, uint32_t& valueOut) {
 
     return !ss.fail();
 }
-=======
->>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
 
 class FileReceiver {
    public:
@@ -81,23 +73,14 @@ class FileReceiver {
             return;
         }
 
-<<<<<<< HEAD
         double progress = (static_cast<double>(index * CHUNK_SIZE) / static_cast<double>(info.getSize())) * 100.0;
 
         std::cout << "\r[Client] Downloading " << static_cast<int>(progress) << "%" << std::flush;
 
         ofs_.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
 
-        // std::cout << "[Client] Received Chunk " << index << " (" << data.size() << " bytes)" << (lastChunk ? " [LAST]" : "") <<
-        // std::endl;
-=======
-        ofs_.write(reinterpret_cast<const char*>(data.data()), static_cast<std::streamsize>(data.size()));
-
-        //std::cout << "[Client] Received Chunk " << index << " (" << data.size() << " bytes)" << (lastChunk ? " [LAST]" : "") << std::endl;
->>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
-
         if (lastChunk) {
-            std::cout << "[Client] All chunks received. File saved to: " << outPath_ << std::endl;
+            std::cout << std::endl << "[Client] All chunks received. File saved to: " << outPath_ << std::endl;
             ofs_.close();
         }
     }
@@ -113,11 +96,7 @@ int main() {
     CommonAPI::Runtime::setProperty("LibraryBase", "FileTransfer");
     auto runtime = CommonAPI::Runtime::get();
 
-<<<<<<< HEAD
     std::shared_ptr<ft::FileTransferProxy<>> proxy;
-=======
-    std::shared_ptr<ft::FileTransferProxy<> > proxy;
->>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
 
     while (!proxy) {
         proxy = runtime->buildProxy<ft::FileTransferProxy>("local", "filetransfer.example.FileTransfer", "client-sample");
@@ -133,20 +112,12 @@ int main() {
     proxy->getFileChunkEvent().subscribe(
         [&](uint32_t index, const CommonAPI::ByteBuffer& data, bool last) { receiver.onChunk(index, data, last); });
 
-<<<<<<< HEAD
     uint32_t currentVersion = 0;
     readUint32FromFile("data/client/update.version", currentVersion);
-    CommonAPI::CallStatus status;
 
+    CommonAPI::CallStatus status;
     proxy->requestUpdate(currentVersion, status, info);
     UPDATE_SIZE = info.getSize();
-=======
-    uint32_t currentVersion = 1;
-    CommonAPI::CallStatus status;
-    ft::FileTransfer::UpdateInfo info;
-
-    proxy->requestUpdate(currentVersion, status, info);
->>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
 
     if (status != CommonAPI::CallStatus::SUCCESS) {
         std::cerr << "[Client] requestUpdate failed!" << std::endl;
@@ -165,17 +136,10 @@ int main() {
 
     std::cout << "[Client] New update available. Starting transfer..." << std::endl;
 
-    bool accepted = false;
-<<<<<<< HEAD
     std::cout << "[Client] Info - New Version: " << info.getNewVersion() << ", Size: " << info.getSize() << ", CRC: 0x" << std::hex
               << info.getCrc() << std::dec << ", Result Code: " << info.getResultCode() << std::endl;
-=======
-    std::cout << "[Client] Info - New Version: " << info.getNewVersion()
-              << ", Size: " << info.getSize()
-              << ", CRC: 0x" << std::hex << info.getCrc() << std::dec
-              << ", Result Code: " << info.getResultCode()
-              << std::endl;
->>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
+
+    bool accepted = false;
     proxy->startTransfer("qnx_uefi.iso", status, accepted);
 
     if (!accepted) {
