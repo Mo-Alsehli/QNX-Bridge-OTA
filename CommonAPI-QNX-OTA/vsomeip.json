@@ -6,8 +6,12 @@
     },
     "applications": [
         {
-            "name": "service-sample",
+            "name": "FileTransferService",
             "id": "0x1212"
+        },
+        {
+            "name": "FileTransferClient",
+            "id": "0x1313"
         }
     ],
 

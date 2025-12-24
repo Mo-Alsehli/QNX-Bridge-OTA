@@ -13,10 +13,17 @@
 namespace ft = v0::filetransfer::example;
 
 static const std::string kUpdateDir = "data/server/";
+<<<<<<< HEAD
 static const std::string kUpdateImage = kUpdateDir + "rpi4-update.wic";
 static const std::string kUpdateVersion = kUpdateDir + "update.version";
 static const std::string kUpdateCrc = kUpdateDir + "update.crc";
 static const size_t CHUNK_SIZE = 64 * 1024;  // 64KB
+=======
+static const std::string kUpdateImage = kUpdateDir + "qnx_uefi.iso";
+static const std::string kUpdateVersion = kUpdateDir + "update.version";
+static const std::string kUpdateCrc = kUpdateDir + "update.crc";
+static const size_t CHUNK_SIZE = 4096;  // 4KB
+>>>>>>> 1a45b159ec1311430e83101bd8d3df1eae984571
 
 // Simple file-exists helper for C++14 (no filesystem)
 bool fileExists(const std::string& path) {
