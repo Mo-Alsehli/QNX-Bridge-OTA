@@ -1,4 +1,0 @@
-/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/vsomeip_example/build/CMakeFiles/service-example.dir
-/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/vsomeip_example/build/CMakeFiles/client-example.dir
-/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/vsomeip_example/build/CMakeFiles/edit_cache.dir
-/home/mmagdi/workspace/OJTBrightskies_Embedded_Linux/vsomeip_example/build/CMakeFiles/rebuild_cache.dir
