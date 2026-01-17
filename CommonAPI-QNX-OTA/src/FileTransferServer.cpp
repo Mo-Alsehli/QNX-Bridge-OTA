@@ -13,7 +13,7 @@
 namespace ft = v0::filetransfer::example;
 
 static const std::string kUpdateDir = "data/server/";
-static const std::string kUpdateImage = kUpdateDir + "rpi4-update.wic";
+static const std::string kUpdateImage = kUpdateDir + "rootfs.ext4";
 static const std::string kUpdateVersion = kUpdateDir + "update.version";
 static const std::string kUpdateCrc = kUpdateDir + "update.crc";
 
