@@ -214,6 +214,8 @@ Detailed technical documentation is available in the [`docs/`](docs/) directory:
 - [3] [QNX Software Development Platform](https://www.qnx.com/developers/docs/8.0/com.qnx.doc.qnxsdp.nav/topic/bookset.html)
 - [4] [Yocto Project](https://www.yoctoproject.org/)
 - [5] [QNX-Raspberry Pi Integration Overview (Video)](https://youtu.be/s8_rvkSfj10?si=fwmeZ1JSDAjHB9g6)
+- [*] **This project supports running on `Qemux86` you can check my `qemu-guide` repo for this:
+    - [Qemu For Embedded Linux](https://github.com/Mo-Alsehli/Qemu-For-Embedded-Linux)
 
 ---
 
